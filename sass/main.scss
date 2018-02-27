@@ -146,6 +146,10 @@ header {
 		position: relative;
 		bottom: 7px;
 		overflow: hidden;
+		&.crossed-off {
+			text-decoration: line-through;
+			opacity: 0.6;
+		}
 	}
 }
 
@@ -178,6 +182,7 @@ label {
 
 label input:checked ~ .custom-checkbox {
 	background-color: $primary-grey;
+	opacity: 0.6;
 }
 
 .custom-checkbox:after {

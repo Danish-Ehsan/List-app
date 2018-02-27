@@ -25,6 +25,8 @@ $(function() {
 
 	console.log(localStorage.mainListArray);
 
+	//localStorage.clear();
+
 	//load locally stored lists if available
 	if (localStorage.mainListArray) {
 		mainListArray = JSON.parse(localStorage.mainListArray);
@@ -74,6 +76,8 @@ $(function() {
 	$indvlList.on('input', function(e) {
 			updateListArray(e);
 			scrollIconToggle();
+	}).on('change', '.checkbox', function(e) {
+		crossOff(e);
 	});
 
 	$delBtn.on('click', deleteList);
@@ -120,7 +124,7 @@ $(function() {
 			}
 		} else {
 			if (mainListArray[currentIndex].items) {
-				mainListArray[currentIndex].items[listIndex] = target.value;
+				mainListArray[currentIndex].items[listIndex] = {content: target.value, index: listIndex};
 				localStorage.mainListArray = JSON.stringify(mainListArray);
 			} else {
 				debugger;
@@ -165,7 +169,6 @@ $(function() {
 			//if key is ENTER or DOWN-ARROW
 			if (e.which == 13 || e.which == 40) {
 				if ($listItem.index() >= allListItems.length - 1) {
-					console.log('$listItem index= ' + $listItem.index());
 					newListItem(true);
 					return false;
 				} else {
@@ -280,7 +283,13 @@ $(function() {
 		for (var i = 0; i < mainListArray[listIndex].items.length; i++) {
 			//console.log(mainListArray[listIndex].items[i]);
 			newListItem();
-			$('.list-item').eq(i).val(mainListArray[listIndex].items[i]);
+			$('.list-item').eq(i).val(mainListArray[listIndex].items[i].content);
+			//if element is crossed off
+			if (mainListArray[listIndex].items[i].checked) {
+				$('.list-item').eq(i).addClass('crossed-off')
+					.prop('disabled', true)
+					.prev().find('.checkbox').prop('checked', true);
+			}
 		}
 
 		for (var i = 0; i < allListItems.length; i++) {
@@ -358,7 +367,37 @@ $(function() {
 		}
 	}
 
+	function crossOff(e) {
+		e.preventDefault;
+		console.log('crossOff test');
+		var $target = $(e.target);
+		var index = $target.parent().parent().index();
+		var items = mainListArray[currentIndex].items;
+		console.log('checkbox index= ' + $target.parent().parent().index());
+		console.log('prop checked= ' + $target.prop('checked'));
 
+		if ($target.is(':checked')) {
+			items[index].checked = true;
+			//items[index].index = index;
+			console.log(mainListArray);
+			var crossedItem = items.splice(index, 1)[0];
+			console.log(crossedItem);
+			items.push(crossedItem);
+			localStorage.mainListArray = JSON.stringify(mainListArray);
+			loadIndvlList(e);
+		} else {
+			console.log('uncheck test');
+			items[index].checked = false;
+			var crossedItem = items.splice(index, 1)[0];
+			if (items.length - 1 >= crossedItem.index) {
+				items.splice(crossedItem.index, 0, crossedItem);
+			} else {
+				items.push(crossedItem);
+			}
+			localStorage.mainListArray = JSON.stringify(mainListArray);
+			loadIndvlList(e);
+		}
+	}
 
 });
 

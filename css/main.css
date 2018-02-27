@@ -164,6 +164,9 @@ header {
     position: relative;
     bottom: 7px;
     overflow: hidden; }
+    #individual-list textarea.crossed-off {
+      text-decoration: line-through;
+      opacity: 0.6; }
 
 #list-title {
   padding-left: 10px;
@@ -189,7 +192,8 @@ label {
   border: 2px solid #545454; }
 
 label input:checked ~ .custom-checkbox {
-  background-color: #545454; }
+  background-color: #545454;
+  opacity: 0.6; }
 
 .custom-checkbox:after {
   content: "";
