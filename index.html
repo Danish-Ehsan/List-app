@@ -1,0 +1,76 @@
+<!Doctype html>
+<html>
+
+<head>
+	<title>Idea Drawer - List App</title>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="https://use.typekit.net/koh0cwe.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<script src="http://code.jquery.com/jquery-3.3.1.js"
+	  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+	  crossorigin="anonymous">
+	</script>
+</head>
+
+<body>
+	<div id="container">
+		<header>
+			<div id="logo"><img src="images/logo.png" alt="Idea Drawer Logo"></logo></div>
+			<div id="settings">
+				<img src="images/settings_icon.png" alt="Settings Icon" id="settings-icon">
+				<ul id="settings-menu">
+					<li>Sort</li>
+					<li>Font Size</li>
+					<li>Night Mode</li>
+					<li>About</li>
+				</ul>
+			</div>
+		</header>
+		<div id="screen">
+			<div id="list-container">
+				<ul id="main-list-container">
+					<!--
+					<li>First List</li>
+					<li>Second List</li>
+					<li>Third List</li>
+					-->
+				</ul>
+				<div id="individual-list-container">
+					<input type="text" name="list-title" id="list-title" class="list-input" placeholder="List Title">
+					<ul id="individual-list">
+						<!--
+						<li><input type="text" value="First list item" name="list-item-one" class="list-input list-item"></li>
+						<li><input type="text" value="Second list item" name="list-item-two" class="list-input list-item"></li>
+						<li><input type="text" value="Third list item" name="list-item-three" class="list-input list-item"></li>
+						-->
+					</ul>
+				</div>
+				<div id="scroll-icon"><img src="images/scroll_icon.png"></div>
+			</div>
+		</div>
+		<div id="buttons">
+			<div class="button" id="back-button">
+				<img src="images/back_icon.png">
+			</div>
+			<div class="button" id="delete-button">
+				<div class="button-content">
+					<img src="images/delete_icon.png" alt="Minus Icon"><span>Delete List</span>
+				</div>
+			</div>
+			<div class="button" id="add-button">
+				<div class="button-content">
+					<img src="images/add_icon.png" alt="Plus Icon"><span>Add List</span>
+				</div>
+			</div>
+			<div id="message-container">
+				<div id="message"></div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="js/main.js"></script>
+</body>
+
+</html>
