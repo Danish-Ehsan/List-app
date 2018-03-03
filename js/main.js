@@ -99,9 +99,13 @@ $(function() {
 		loadIndvlList(e);
 	});
 
-	$settingsIcon.on('click', function() {
-		$(this).toggleClass('active');
+	$settingsIcon.on('click', '#settings-icon', function() {
+		$settingsIcon.toggleClass('active');
 		$settingsMenu.toggleClass('active');
+	})
+
+	$settingsMenu.on('click', function(e) {
+		$(e.target).find('ul').toggle();
 	})
 
 
@@ -148,8 +152,9 @@ $(function() {
 		}
 	}
 
-	function newListItem(focus) {
-		var $listItem = $('<li>').appendTo($indvlList);
+	function newListItem(focus, loading) {
+		//new list item should always be on the bottom when called by loadIndvlList() with loading parameter
+		var $listItem = $indvlList.find('.crossed-off').length && !loading ? $('<li>').insertBefore($indvlList.find('.crossed-off').parent()) : $('<li>').appendTo($indvlList);
 		var $label = $('<label>').appendTo($listItem);
 		var $checkbox = $('<input>').appendTo($label).attr({
 			type: 'checkbox',
@@ -163,6 +168,12 @@ $(function() {
 		}).css('resize', 'none');
 
 		if (focus) { $input.focus(); };
+
+		console.log('newlistitem index= ' + $listItem.index());
+		//create space for newItem so crossed item doesn't get overwritten on input but not when called by loadIndvlList()
+		if ($indvlList.find('.crossed-off').length && !loading) {
+			mainListArray[currentIndex].items.splice($listItem.index(), 0, {});
+		}
 
 		$listItem.on('keydown', function(e) {
 			$target = $(e.target);
@@ -232,11 +243,12 @@ $(function() {
 		scrollIconToggle();
 	}
 
+
 	//show scroll icon if list is overflowing
 	function scrollIconToggle() {
 		var $thisList = $mainCont.css('display') == 'none' ? $indvlList : $mainCont;
 
-		if($thisList.prop('scrollHeight') > $thisList.height() && $scrollIcon.css('display') == 'none') {
+		if ($thisList.prop('scrollHeight') > $thisList.height() && $scrollIcon.css('display') == 'none') {
 			$scrollIcon.show();
 			console.log('scroll arrow show');
 		} else if ($thisList.prop('scrollHeight') <= $thisList.height() && $scrollIcon.css('display') == 'block'){
@@ -267,6 +279,8 @@ $(function() {
 
 	function loadIndvlList(e) {
 		console.log(mainListArray);
+
+		//change these lines so they only trigger if event is called from mainCont
 		var target = e.target;
 		var listIndex = $(target).index();
 		currentIndex = listIndex;
@@ -282,7 +296,7 @@ $(function() {
 		$listTitle.val(mainListArray[listIndex].name);
 		for (var i = 0; i < mainListArray[listIndex].items.length; i++) {
 			//console.log(mainListArray[listIndex].items[i]);
-			newListItem();
+			newListItem(false, true);
 			$('.list-item').eq(i).val(mainListArray[listIndex].items[i].content);
 			//if element is crossed off
 			if (mainListArray[listIndex].items[i].checked) {
@@ -368,35 +382,44 @@ $(function() {
 	}
 
 	function crossOff(e) {
-		e.preventDefault;
-		console.log('crossOff test');
+		//debugger;
+		//e.preventDefault;
 		var $target = $(e.target);
 		var index = $target.parent().parent().index();
 		var items = mainListArray[currentIndex].items;
-		console.log('checkbox index= ' + $target.parent().parent().index());
-		console.log('prop checked= ' + $target.prop('checked'));
+		var itemIndex = items[index].index;
+		var removedEl;
 
 		if ($target.is(':checked')) {
 			items[index].checked = true;
 			//items[index].index = index;
-			console.log(mainListArray);
 			var crossedItem = items.splice(index, 1)[0];
-			console.log(crossedItem);
 			items.push(crossedItem);
 			localStorage.mainListArray = JSON.stringify(mainListArray);
-			loadIndvlList(e);
+			$removedEl = $target.parent().parent().detach();
+			$removedEl.appendTo($indvlList).find('.list-item').addClass('crossed-off')
+				.prop('disabled', true)
+				.prev().find('.checkbox').prop('checked', true);
 		} else {
-			console.log('uncheck test');
 			items[index].checked = false;
 			var crossedItem = items.splice(index, 1)[0];
-			if (items.length - 1 >= crossedItem.index) {
+			if ($indvlList.children().not(':has(.crossed-off)').length - 1 >= crossedItem.index) {
 				items.splice(crossedItem.index, 0, crossedItem);
 			} else {
-				items.push(crossedItem);
+				items.splice($indvlList.children().not(':has(.crossed-off)').length, 0, crossedItem);
 			}
 			localStorage.mainListArray = JSON.stringify(mainListArray);
-			loadIndvlList(e);
+			$removedEl = $target.prop('checked', false)
+							.parent().next().removeClass('crossed-off').prop('disabled', false)
+							.parent().detach();
+
+			if ($indvlList.children().not(':has(.crossed-off)').length - 1 >= itemIndex) {
+				$removedEl.insertBefore($indvlList.children().eq(itemIndex));
+			} else {
+				$removedEl.insertAfter($indvlList.children().not(':has(.crossed-off)').last());
+			}
 		}
+		//$($indvlList).find('.crossed-off').length
 	}
 
 });

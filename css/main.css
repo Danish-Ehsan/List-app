@@ -113,7 +113,20 @@ header {
   #settings-menu li {
     padding: 8px 0;
     position: relative;
-    display: block; }
+    display: block;
+    cursor: pointer; }
+
+li > ul {
+  opacity: 0.6;
+  font-size: 0;
+  padding-top: 3px;
+  padding-bottom: 0;
+  cursor: default;
+  display: none; }
+  li > ul li {
+    cursor: pointer;
+    font-size: 10pt;
+    padding: 0 0; }
 
 #screen {
   width: 90%;
