@@ -21,7 +21,6 @@ $(function() {
 	var lastDeleted;
 	var undoTimer;
 
-	//localStorage.clear();
 
 	console.log(localStorage.mainListArray);
 
@@ -41,7 +40,7 @@ $(function() {
 
 			//currentIndex updates before mainListArray has new push so no need for length -1 to account for 0 base index
 			currentIndex = mainListArray.length;
-			mainListArray.push({items: []});
+			mainListArray.push({items: [], timestamp: Date.now()});
 
 			if (window.localStorage && !localStorage.mainListArray) {
 				localStorage.setItem('mainListArray', JSON.stringify(mainListArray));
@@ -87,9 +86,11 @@ $(function() {
 		if ($mainCont.css('display') == 'none') { 
 			if (!mainListArray[mainListArray.length - 1].name && !mainListArray[mainListArray.length - 1].items.length) {
 				mainListArray.splice((mainListArray.length - 1), 1);
+				localStorage.mainListArray = JSON.stringify(mainListArray);
 			//if title left blank replace with 'unnamed'
 			} else if (!mainListArray[mainListArray.length - 1].name && mainListArray[mainListArray.length - 1].items) {
 				mainListArray[mainListArray.length -1].name = 'unnamed';
+				localStorage.mainListArray = JSON.stringify(mainListArray);
 			}
 			loadMainList();
 		}
@@ -102,11 +103,81 @@ $(function() {
 	$settingsIcon.on('click', '#settings-icon', function() {
 		$settingsIcon.toggleClass('active');
 		$settingsMenu.toggleClass('active');
-	})
+	});
 
 	$settingsMenu.on('click', function(e) {
-		$(e.target).find('ul').toggle();
-	})
+		console.log(e.target);
+		$target = $(e.target);
+		$target.find('ul').toggle();
+		if ($target.parent().is('.innerMenu')) {
+			console.log('menu test');
+			sortList(e);
+		}
+	});
+/*
+	$settingsMenu.on('click', $('li > ul'), function(e) {
+		console.log('menu test');
+		console.log('menu target= ' + e.target);
+	});
+*/
+
+	function sortList(e) {
+		var $target = $(e.target);
+		$settingsIcon.toggleClass('active');
+		$settingsMenu.toggleClass('active').find('ul').hide();
+
+		console.log('target text= ' + $target.text());
+		if ($mainCont.css('display') == 'block') {
+			console.log('sort test 2');
+			if ($target.text() == 'by name') {
+				console.log('sort test 3');
+				mainListArray.sort(function(a, b) {
+					if (a.name > b.name) {
+						return 1;
+					} else if (a.name < b.name) {
+						return -1;
+					} else {
+						return 0;
+					}
+				});
+			} else if ($target.text() == 'by date') {
+				mainListArray.sort(function(a, b) {
+					if (a.timestamp < b.timestamp) {
+						return -1;
+					} else if (a.timestamp > b.timestamp) {
+						return 1;
+					} else {
+						return 0;
+					}
+				});
+			}
+			loadMainList();
+		} else {
+			if ($target.text() == 'by name') {
+				mainListArray[currentIndex].items.sort(function(a, b) {
+					if ((a.content > b.content) && (a.checked == b.checked)) {
+						return 1;
+					} else if ((a.content < b.content) && (a.checked == b.checked)) {
+						return -1;
+					} else if ((a.checked == b.checked) || (a.content != b.content)) {
+						return 0;
+					}
+				});
+			} else if ($target.text() == 'by date') {
+				mainListArray[currentIndex].items.sort(function(a, b) {
+					if ((a.timestamp > b.timestamp) && (a.checked == b.checked)) {
+						return 1;
+					} else if ((a.timestamp < b.timestamp) && (a.checked == b.checked)) {
+						return -1;
+					} else if ((a.checked == b.checked) || (a.timestamp != b.timestamp)) {
+						return 0;
+					}
+				});
+			}
+			loadIndvlList();
+		}
+		localStorage.mainListArray = JSON.stringify(mainListArray);
+	}
 
 
 	function updateListArray(e) {
@@ -128,7 +199,7 @@ $(function() {
 			}
 		} else {
 			if (mainListArray[currentIndex].items) {
-				mainListArray[currentIndex].items[listIndex] = {content: target.value, index: listIndex};
+				mainListArray[currentIndex].items[listIndex].content = target.value;
 				localStorage.mainListArray = JSON.stringify(mainListArray);
 			} else {
 				debugger;
@@ -173,6 +244,8 @@ $(function() {
 		//create space for newItem so crossed item doesn't get overwritten on input but not when called by loadIndvlList()
 		if ($indvlList.find('.crossed-off').length && !loading) {
 			mainListArray[currentIndex].items.splice($listItem.index(), 0, {});
+		} else if (!loading) {
+			mainListArray[currentIndex].items.push({timestamp: Date.now(), index: $listItem.index(), checked: false});
 		}
 
 		$listItem.on('keydown', function(e) {
@@ -281,9 +354,13 @@ $(function() {
 		console.log(mainListArray);
 
 		//change these lines so they only trigger if event is called from mainCont
-		var target = e.target;
-		var listIndex = $(target).index();
-		currentIndex = listIndex;
+		if (e) {
+			var target = e.target;
+			var listIndex = $(target).index();
+			currentIndex = listIndex;
+		} else {
+			var listIndex = currentIndex;
+		}
 
 		$indvlList.empty();
 		$mainCont.hide();
@@ -415,8 +492,10 @@ $(function() {
 
 			if ($indvlList.children().not(':has(.crossed-off)').length - 1 >= itemIndex) {
 				$removedEl.insertBefore($indvlList.children().eq(itemIndex));
-			} else {
+			} else if ($indvlList.children().not(':has(.crossed-off)').length) {
 				$removedEl.insertAfter($indvlList.children().not(':has(.crossed-off)').last());
+			} else {
+				$removedEl.prependTo($indvlList);
 			}
 		}
 		//$($indvlList).find('.crossed-off').length
