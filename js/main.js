@@ -169,7 +169,7 @@ $(function() {
 						return 1;
 					} else if ((a.timestamp < b.timestamp) && (a.checked == b.checked)) {
 						return -1;
-					} else if ((a.checked == b.checked) || (a.timestamp != b.timestamp)) {
+					} else if ((a.checked != b.checked) || (a.timestamp == b.timestamp)) {
 						return 0;
 					}
 				});
@@ -308,7 +308,7 @@ $(function() {
 				$target.parent().remove();
 				console.log(mainListArray);
 				//check if scroll icon should be removed
-				scrollIconToggle();
+				//scrollIconToggle();
 				//return false so the previous lists letter doesn't delete after keyup
 				return false;
 			}
@@ -319,12 +319,16 @@ $(function() {
 
 	//show scroll icon if list is overflowing
 	function scrollIconToggle() {
+		//debugger;
 		var $thisList = $mainCont.css('display') == 'none' ? $indvlList : $mainCont;
+		console.log('scrollHeight= ' + $thisList.prop('scrollHeight'));
+		console.log('height= ' + Math.ceil($thisList.height()));
 
-		if ($thisList.prop('scrollHeight') > $thisList.height() && $scrollIcon.css('display') == 'none') {
+		//Math.ceil() is used to accomadate Firefox which was returning a few decimal places below the scrollHeight
+		if ($thisList.prop('scrollHeight') > Math.ceil($thisList.height()) && $scrollIcon.css('display') == 'none') {
 			$scrollIcon.show();
 			console.log('scroll arrow show');
-		} else if ($thisList.prop('scrollHeight') <= $thisList.height() && $scrollIcon.css('display') == 'block'){
+		} else if ($thisList.prop('scrollHeight') <= Math.ceil($thisList.height()) && $scrollIcon.css('display') == 'block') {
 			$scrollIcon.hide();
 			console.log('scroll arrow hide');
 		}
